@@ -101,16 +101,22 @@ void ofxFlexibleVideoPlayer::update() {
     auto lastPlayhead = mPlayhead;
     mPlayhead+= timeSinceLastUpdate * mSpeed;
     
-    // simple loopback
-    if (mLoop == OF_LOOP_NORMAL && mPlayhead >= mContentLength) {
-        setPosition(0);
-    }
-    
     audioMutex.lock();
-    mLastAudioPlayhead = mAudioPlayhead;
     auto playheadDiff = (mPlayhead - lastPlayhead);
     mAudioStep = playheadDiff / timeSinceLastUpdate;
     audioMutex.unlock();
+    
+    // simple loopback
+    if (mLoop == OF_LOOP_NORMAL) {
+        if (mPlayhead >= mContentLength) {
+            setPositionTime(0);
+        }
+        else if (mPlayhead < 0) {
+            setPositionTime(mContentLength);
+        }
+    }
+    
+    cout << mAudioStep << endl;
     
 }
 
@@ -120,11 +126,29 @@ void ofxFlexibleVideoPlayer::draw() {
     int frameA = int(floor(exactFrame));
     int frameB = int(ceil(exactFrame));
     
-    if (frameB == mTextures.size()) {
-        frameB = 0;
+    frameA %= mTextures.size();
+    frameB %= mTextures.size();
+    
+//    if (frameB == mTextures.size()) {
+//        if (frameA == mTextures.size()) {
+//            frameA = 0;
+//        }
+//        else {
+//            frameB = 0;
+//        }
+//    }
+    if (frameB == frameA) {
+        if (mSpeed > 0) {
+            frameB = (frameA + 1 + mTextures.size()) % mTextures.size();
+        }
+        else {
+            frameA = (frameA - 1 + mTextures.size()) % mTextures.size();
+        }
     }
     
-    float blend = exactFrame - frameA;
+    assert(frameA != frameB);
+    
+    float blend = (exactFrame - frameA) / float(frameB - frameA);
         
     assert(frameA >= 0 && frameA < mTextures.size());
     
@@ -158,6 +182,7 @@ void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {
     // TODO: fix for variable channels
     for (int i = 0; i < l; i++) {
         float pos = (mAudioPlayhead + mAudioStep * i);
+        if (pos < 0) pos+= mainDataLength;
         float a = mAudioData[int(floor(pos)) % mainDataLength];
         float b = mAudioData[int(ceil(pos)) % mainDataLength];
         float blend = pos - floor(pos);
@@ -167,6 +192,9 @@ void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {
     mAudioPlayhead+= l * mAudioStep;
     if (mAudioPlayhead >= mainDataLength) {
         mAudioPlayhead-= mainDataLength;
+    }
+    else if (mAudioPlayhead < mainDataLength) {
+        mAudioPlayhead+= mainDataLength;
     }
 }
 
