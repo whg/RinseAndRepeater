@@ -8,17 +8,52 @@
 
 #include "ofxFlexibleVideoPlayer.h"
 
+#define STRINGIFY(x) #x
+
+static const string shaderVersion = "#version 150\n";
+static const string vertShader = shaderVersion + STRINGIFY(
+    uniform mat4 modelViewProjectionMatrix;
+
+    in vec4  position;
+    in vec2  texcoord;
+
+    out vec2 texCoordVarying;
+
+    void main() {
+        texCoordVarying = (vec4(texcoord.x,texcoord.y,0,1)).xy;
+        gl_Position = modelViewProjectionMatrix * position;
+    }
+);
+
+
+static const string fragShader = shaderVersion + STRINGIFY(
+    uniform sampler2DRect texA;
+    uniform sampler2DRect texB;
+    uniform float blend;
+    uniform vec2 size;
+
+    in vec2 texCoordVarying;
+
+    out vec4 fragColor;
+
+    void main(){
+        fragColor = mix(texture(texA, texCoordVarying * size), texture(texB, texCoordVarying * size), blend);
+    }
+);
+
+
 ofxFlexibleVideoPlayer::ofxFlexibleVideoPlayer():
 mLastUpdateTime(0),
 mFrameRate(0),
 mLoop(OF_LOOP_NORMAL),
 mAudioStep(1),
-mSpeed(1) {
-}
+mSpeed(1) {}
 
 // framesFolder: a directory of images, in the right order, alphabetical?
 // audioFile: a .wav file of the soundtrack
 void ofxFlexibleVideoPlayer::load(string framesFolder, string audioFile, float frameRate) {
+
+    cout << framesFolder << endl;
     
     ofDirectory dir(framesFolder);
     ofImage img;
@@ -28,6 +63,8 @@ void ofxFlexibleVideoPlayer::load(string framesFolder, string audioFile, float f
         img.load(path);
         tex.loadData(img.getPixels());
         mTextures.emplace_back(std::move(tex));
+        
+        cout << file.getAbsolutePath() << endl;
     }
     
     ofLogNotice("ofxFlexibleVideoPlayer") << "loaded " << mTextures.size() << " images";
@@ -47,10 +84,12 @@ void ofxFlexibleVideoPlayer::load(string framesFolder, string audioFile, float f
     mSoundtrackSample.getLength();
     auto audiolength = mSoundtrackSample.length;
     
-    blendShader.load("shaders/blend");
+    blendShader.setupShaderFromSource(GL_VERTEX_SHADER, vertShader);
+    blendShader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShader);
+    blendShader.bindDefaults();
+    blendShader.linkProgram();
     
-//    mLastUpdateTime = 0;
-//    mFrameTime = 0;
+    ofSetWindowShape(mTextures[0].getWidth(), mTextures[0].getHeight());
 }
 
 void ofxFlexibleVideoPlayer::update() {
@@ -59,32 +98,18 @@ void ofxFlexibleVideoPlayer::update() {
     auto timeSinceLastUpdate = currentTime - mLastUpdateTime;
     mLastUpdateTime = ofGetElapsedTimef();
     
-    auto lastPlayhead = mPlayhead; // * 0.3 --- is pretty cool!!!
+    auto lastPlayhead = mPlayhead;
     mPlayhead+= timeSinceLastUpdate * mSpeed;
     
     // simple loopback
     if (mLoop == OF_LOOP_NORMAL && mPlayhead >= mContentLength) {
-    
         setPosition(0);
     }
     
     audioMutex.lock();
-//    mSoundtrackSample.setPosition(mPlayhead / mContentLength);
     mLastAudioPlayhead = mAudioPlayhead;
     auto playheadDiff = (mPlayhead - lastPlayhead);
     mAudioStep = playheadDiff / timeSinceLastUpdate;
-    
-//    if (ofGetKeyPressed('a')) {
-//        mAudioPlayhead = (mPlayhead / mContentLength) * mAudioData.size();
-//        printf("\n\n\n\n\n\n\n");
-//    }
-//    else if (ofGetKeyPressed('s')) {
-//        cout << mAudioPlayhead - ((mPlayhead / mContentLength) * mAudioData.size()) << ",";
-//    }
-////    cout << "," << mAudioPlayhead;
-//    if (mLastAudioPlayhead > mAudioPlayhead) {
-//        mLastAudioPlayhead = mAudioPlayhead;
-//    }
     audioMutex.unlock();
     
 }
@@ -94,6 +119,11 @@ void ofxFlexibleVideoPlayer::draw() {
     float exactFrame = mPlayhead / mFrameTime;
     int frameA = int(floor(exactFrame));
     int frameB = int(ceil(exactFrame));
+    
+    if (frameB == mTextures.size()) {
+        frameB = 0;
+    }
+    
     float blend = exactFrame - frameA;
         
     assert(frameA >= 0 && frameA < mTextures.size());
@@ -102,7 +132,6 @@ void ofxFlexibleVideoPlayer::draw() {
     ofMesh mesh = ofMesh::plane(texSize.x, texSize.y);
     
     ofTranslate(texSize / 2);
-    ofEnableNormalizedTexCoords();
     blendShader.begin();
 
     blendShader.setUniformTexture("texA", mTextures[frameA], 0);
@@ -112,10 +141,7 @@ void ofxFlexibleVideoPlayer::draw() {
     mesh.drawFaces();
     
     blendShader.end();
-    ofDisableNormalizedTexCoords();
 
-    
-    
 //    printf("%d, %d, %f\n", frameA, frameB, blend);
 }
 
@@ -124,22 +150,18 @@ void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {
     ofScopedLock lock(audioMutex);
     
     auto &data = buffer.getBuffer();
-//    std::copy(mAudioData.begin() + mAudioPlayhead, mAudioData.begin() + mAudioPlayhead + buffer.size(), data.begin());
-
-//    float step = (mAudioPlayhead - mLastAudioPlayhead) / float(buffer.getNumFrames());
-    
     auto mainDataLength = mAudioData.size();
 
-    auto l = buffer.size() / 2;
+    int nChannels = buffer.getNumChannels();
+    auto l = buffer.size() / nChannels;
     auto it = mAudioData.begin() + mAudioPlayhead;
+    // TODO: fix for variable channels
     for (int i = 0; i < l; i++) {
         float pos = (mAudioPlayhead + mAudioStep * i);
         float a = mAudioData[int(floor(pos)) % mainDataLength];
         float b = mAudioData[int(ceil(pos)) % mainDataLength];
         float blend = pos - floor(pos);
         data[i*2] = data[i*2+1] = a * (1.f - blend) + b * blend;
-//        data[i*2] = data[i*2+1] = mAudioData[(mAudioPlayhead + i) % mainDataLength];
-//        ++it;
     }
     
     mAudioPlayhead+= l * mAudioStep;

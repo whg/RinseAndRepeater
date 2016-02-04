@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxGui.h"
 
 #include "ofxMidi.h"
 
@@ -23,38 +22,14 @@ public:
 
     void audioOut( ofSoundBuffer& buffer );
 
-    ofVideoPlayer player;
-    
-    ofxPanel panel;
-    bool showGui;
-    
-    ofParameter<float> position;
-    ofParameter<float> start;
-    ofParameter<float> duration;
-    ofParameter<int> frameRate;
-    ofParameter<bool> reverse;
-    vector<ofTexture> texes;
-    
-    int framePosition;
-    float minDuration;
     
     ofxMidiIn midiIn;
     void newMidiMessage(ofxMidiMessage& msg);
-    
-    ofxMidiOut midiOut;
-    
-    float playHeadTime;
-    
+
     ofxFlexibleVideoPlayer flexiPlayer;
-};
-
-#include "ofxSlider.h"
-
-template<typename T>
-class ofxMidiMappableSlider : public ofxSlider<T> {
+    float starts[8];
     
-    virtual bool mousePressed(ofMouseEventArgs & args) override {
-//        cout << "hello" << end;
-        ofxSlider<T>::mousePressed(args);
-    }
+    map<int, std::function<void(int)>> functionMap;
+    map<int, std::function<void(int)>> startMap;
+
 };
