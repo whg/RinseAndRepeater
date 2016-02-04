@@ -46,6 +46,8 @@ void ofxFlexibleVideoPlayer::load(string framesFolder, string audioFile, float f
     mSoundtrackSample.getLength();
     auto audiolength = mSoundtrackSample.length;
     
+    blendShader.load("shaders/blend");
+    
 //    mLastUpdateTime = 0;
 //    mFrameTime = 0;
 }
@@ -57,7 +59,7 @@ void ofxFlexibleVideoPlayer::update() {
     mLastUpdateTime = ofGetElapsedTimef();
     
     auto lastPlayhead = mPlayhead; // * 0.3 --- is pretty cool!!!
-    mPlayhead+= timeSinceLastUpdate * 0.3;
+    mPlayhead+= timeSinceLastUpdate * 0.02;
     
     // simple loopback
     if (mLoop == OF_LOOP_NORMAL && mPlayhead >= mContentLength) {
@@ -95,14 +97,33 @@ void ofxFlexibleVideoPlayer::draw() {
     int frameA = int(floor(exactFrame));
     int frameB = int(ceil(exactFrame));
     float blend = exactFrame - frameA;
-    
+        
     assert(frameA >= 0 && frameA < mTextures.size());
     
-    mTextures[frameA].draw(0, 0);
+    ofVec2f texSize(mTextures[0].getWidth(), mTextures[0].getHeight());
+    ofMesh mesh = ofMesh::plane(texSize.x, texSize.y);
+    
+    mTextures[frameA].bind();
+    
+    ofTranslate(texSize / 2);
+    ofEnableNormalizedTexCoords();
+    blendShader.begin();
+
+    blendShader.setUniformTexture("texA", mTextures[frameA], 0);
+    blendShader.setUniformTexture("texB", mTextures[frameB], 1);
+    blendShader.setUniform1f("blend", blend);
+    blendShader.setUniform2f("size", texSize);
+    mesh.drawFaces();
+    
+    blendShader.end();
+    ofDisableNormalizedTexCoords();
+    
+    mTextures[frameA].unbind();
+//    mTextures[frameA].draw(0, 0);
     
     ofDrawBitmapStringHighlight(ofToString(frameA), 10, 10);
     
-//    printf("%d, %d\n", frameA, frameB);
+    printf("%d, %d, %f\n", frameA, frameB, blend);
 }
 
 void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {

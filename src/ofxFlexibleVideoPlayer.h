@@ -22,6 +22,8 @@ public:
     
     void audioOut(ofSoundBuffer& buffer);
     
+    void setPosition(float time);
+    void setFrame(int frame);
     
 protected:
     vector<ofTexture> mTextures;
@@ -39,4 +41,6 @@ protected:
     ofLoopType mLoop;
     
     ofMutex audioMutex;
+    
+    ofShader blendShader;
 };
