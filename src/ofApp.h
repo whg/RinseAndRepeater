@@ -18,6 +18,8 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
 
+    void audioOut( ofSoundBuffer& buffer );
+
     ofVideoPlayer player;
     
     ofxPanel panel;
@@ -28,7 +30,7 @@ public:
     ofParameter<float> duration;
     ofParameter<int> frameRate;
     ofParameter<bool> reverse;
-    vector<ofImage> texes;
+    vector<ofTexture> texes;
     
     int framePosition;
     float minDuration;
