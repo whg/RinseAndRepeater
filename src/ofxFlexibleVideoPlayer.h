@@ -22,8 +22,16 @@ public:
     
     void audioOut(ofSoundBuffer& buffer);
     
-    void setPosition(float time);
+    void setPositionTime(float time);
     void setFrame(int frame);
+    void setPosition(float point);
+    
+    float getPositionTime() { return mPlayhead; }
+    int getFrame() { return int(mPlayhead * mFrameTime); }
+    float getPosition() { return mPlayhead / mContentLength; }
+    
+    void setSpeed(float speed) { mSpeed = speed; }
+    float getSpeed() { return mSpeed; }
     
 protected:
     vector<ofTexture> mTextures;
@@ -35,6 +43,7 @@ protected:
     float mFrameRate, mFrameTime;
     float mContentLength; // in seconds
     float mPlayhead; // playhead in seconds
+    float mSpeed;
 protected:
     float mLastUpdateTime;
     

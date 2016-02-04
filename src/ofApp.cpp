@@ -1,9 +1,9 @@
 #include "ofApp.h"
 
-#include "ofxFlexibleVideoPlayer.h"
-ofxFlexibleVideoPlayer flexiPlayer;
+
 
 map<int, std::function<void(int)>> functionMap;
+map<int, std::function<void(int)>> startMap;
 
 void ofApp::setup() {
 
@@ -28,10 +28,10 @@ void ofApp::setup() {
 //    
 //    framePosition = 0;
 //    
-//    ofxMidiIn::listPorts();
-//    midiIn.openPort(2);
-//    midiIn.addListener(this);
-//    
+    ofxMidiIn::listPorts();
+    midiIn.openPort(2);
+    midiIn.addListener(this);
+//
 //    midiOut.openPort(0);
 //    
 //    
@@ -40,7 +40,7 @@ void ofApp::setup() {
 //    
 //    functionMap[1] = [this](int value) { this->start = value/127.0; this->framePosition = this->start * this->texes.size(); };
 //    functionMap[2] = [this](int value) { this->duration = value/127.0 + this->minDuration; };
-//    functionMap[3] = [this](int value) { this->frameRate = ofMap(value, 0, 127, 15, 240); };
+    functionMap[3] = [this](int value) { this->flexiPlayer.setSpeed(ofMap(value, 0, 127, 0.1, 3)); };
 //
 //
 //
@@ -56,6 +56,11 @@ void ofApp::setup() {
 //
 //
 //    cout << player.getTotalNumFrames() << endl;
+
+    startMap[44] = [this](int vel) { this->flexiPlayer.setPosition(0.1); };
+    startMap[45] = [this](int vel) { this->flexiPlayer.setPosition(0.4); };
+    startMap[46] = [this](int vel) { this->flexiPlayer.setPosition(0.6); };
+    startMap[47] = [this](int vel) { this->flexiPlayer.setPosition(0.7); };
 }
 
 void ofApp::audioOut( ofSoundBuffer& buffer ) {
@@ -192,7 +197,14 @@ void ofApp::mouseReleased(int x, int y, int button) {}
 void ofApp::newMidiMessage(ofxMidiMessage& msg) {
 //    cout << msg.control << endl;
     
-    if (functionMap.count(msg.control)) {
-        functionMap[msg.control](msg.value);
+    if (msg.status == MIDI_CONTROL_CHANGE) {
+        if (functionMap.count(msg.control)) {
+            functionMap[msg.control](msg.value);
+        }
+    }
+    else if (msg.status == MIDI_NOTE_ON) {
+        if (startMap.count(msg.pitch)) {
+            startMap[msg.pitch](msg.velocity);
+        }
     }
 }

@@ -12,7 +12,8 @@ ofxFlexibleVideoPlayer::ofxFlexibleVideoPlayer():
 mLastUpdateTime(0),
 mFrameRate(0),
 mLoop(OF_LOOP_NORMAL),
-mAudioStep(1) {
+mAudioStep(1),
+mSpeed(1) {
 }
 
 // framesFolder: a directory of images, in the right order, alphabetical?
@@ -59,15 +60,12 @@ void ofxFlexibleVideoPlayer::update() {
     mLastUpdateTime = ofGetElapsedTimef();
     
     auto lastPlayhead = mPlayhead; // * 0.3 --- is pretty cool!!!
-    mPlayhead+= timeSinceLastUpdate * 0.02;
+    mPlayhead+= timeSinceLastUpdate * mSpeed;
     
     // simple loopback
     if (mLoop == OF_LOOP_NORMAL && mPlayhead >= mContentLength) {
-        mPlayhead = 0;
-        
-        audioMutex.lock();
-        mAudioPlayhead = 0;
-        audioMutex.unlock();
+    
+        setPosition(0);
     }
     
     audioMutex.lock();
@@ -103,8 +101,6 @@ void ofxFlexibleVideoPlayer::draw() {
     ofVec2f texSize(mTextures[0].getWidth(), mTextures[0].getHeight());
     ofMesh mesh = ofMesh::plane(texSize.x, texSize.y);
     
-    mTextures[frameA].bind();
-    
     ofTranslate(texSize / 2);
     ofEnableNormalizedTexCoords();
     blendShader.begin();
@@ -117,13 +113,10 @@ void ofxFlexibleVideoPlayer::draw() {
     
     blendShader.end();
     ofDisableNormalizedTexCoords();
+
     
-    mTextures[frameA].unbind();
-//    mTextures[frameA].draw(0, 0);
     
-    ofDrawBitmapStringHighlight(ofToString(frameA), 10, 10);
-    
-    printf("%d, %d, %f\n", frameA, frameB, blend);
+//    printf("%d, %d, %f\n", frameA, frameB, blend);
 }
 
 void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {
@@ -154,3 +147,22 @@ void ofxFlexibleVideoPlayer::audioOut(ofSoundBuffer& buffer) {
         mAudioPlayhead-= mainDataLength;
     }
 }
+
+void ofxFlexibleVideoPlayer::setPositionTime(float time) {
+    mPlayhead = time;
+    
+    audioMutex.lock();
+    mAudioPlayhead = (mPlayhead / mContentLength) * mAudioData.size();
+    audioMutex.unlock();
+
+}
+
+void ofxFlexibleVideoPlayer::setFrame(int frame) {
+    setPositionTime(frame * mFrameTime);
+}
+
+void ofxFlexibleVideoPlayer::setPosition(float point) {
+    setPositionTime(point * mContentLength);
+}
+
+

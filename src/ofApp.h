@@ -5,6 +5,9 @@
 
 #include "ofxMidi.h"
 
+#include "ofxFlexibleVideoPlayer.h"
+
+
 class ofApp : public ofBaseApp, public ofxMidiListener {
 public:
     void setup();
@@ -41,6 +44,8 @@ public:
     ofxMidiOut midiOut;
     
     float playHeadTime;
+    
+    ofxFlexibleVideoPlayer flexiPlayer;
 };
 
 #include "ofxSlider.h"
