@@ -37,6 +37,8 @@ public:
     void newMidiMessage(ofxMidiMessage& msg);
     
     ofxMidiOut midiOut;
+    
+    float playHeadTime;
 };
 
 #include "ofxSlider.h"

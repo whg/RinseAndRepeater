@@ -35,6 +35,8 @@ void ofApp::setup() {
     functionMap[3] = [this](int value) { this->frameRate = ofMap(value, 0, 127, 15, 240); };
 
 
+
+    playHeadTime = 0;
 //
 //
 //    cout << player.getTotalNumFrames() << endl;
@@ -59,18 +61,30 @@ void ofApp::update() {
             cout << "added frame " << i << endl;
         }
         
-        minDuration = (1.0f / int(texes.size())) * 1.0;
+        //minDuration = (1.0f / int(texes.size())) * 1.0;
     }
     
 
     
     static float lastFrameTime = ofGetElapsedTimef();
-    static float timedelta = 0;
-    timedelta += ofGetElapsedTimef() - lastFrameTime;
-    if (timedelta >= 1.0/frameRate) {
-        int numFrames = timedelta / (1.0/frameRate);
-        framePosition+= reverse ? -numFrames : numFrames;
-        timedelta = 0;
+    static float timeSinceLastFrame = 0;
+    float timedelta = ofGetElapsedTimef() - lastFrameTime;
+    lastFrameTime = ofGetElapsedTimef();
+
+    
+    timeSinceLastFrame+= timedelta;
+    float frameTime = 1.0f / frameRate;
+    
+    printf("%f, %f, %d, %f\n", timedelta, timeSinceLastFrame, framePosition, frameTime);
+    
+    if (timeSinceLastFrame >= frameTime) {
+        int framesMoved = timeSinceLastFrame / frameTime;
+        framePosition+= reverse ? -framesMoved : framesMoved;
+        
+        float timeMoved = framesMoved * frameTime;
+        timeSinceLastFrame-= timeMoved;
+        
+        playHeadTime+= reverse ? -timeMoved : timeMoved;
     }
     
     auto durationInFrames = duration * int(texes.size());
@@ -81,7 +95,7 @@ void ofApp::update() {
     }
     else if (!reverse && framePosition >= start*int(texes.size()) + durationInFrames) {
         framePosition = int(start*texes.size());
-        midiOut.sendNoteOn(1, 48, 127);
+//        midiOut.sendNoteOn(1, 48, 127);
     }
     
     if (framePosition >= int(texes.size())) {
@@ -94,9 +108,8 @@ void ofApp::update() {
     
     position = framePosition/float(texes.size());
     
-    lastFrameTime = ofGetElapsedTimef();
     
-    cout << framePosition << endl;
+//    cout << framePosition << endl;
     
 //    position = player.getPosition();
 //    
