@@ -38,9 +38,9 @@ static const string fragShader = shaderVersion + STRINGIFY(
         //make the mosaic pixels square
         vec2 squarePixel = vec2(1.0, size.x / size.y);
         
-//        vec4 rateCrushCol = texture(tex, (floor(texCoordVarying * crushVector) / crushVector) * size);
         vec2 scaledCoord = texCoordVarying * size;// * squarePixel;
-        vec4 rateCrushCol = texture(tex, scaledCoord - mod(scaledCoord, vec2(rateCrush)));
+        vec2 centeredCoord = (scaledCoord) - mod(scaledCoord-size/2, vec2(rateCrush));
+        vec4 rateCrushCol = texture(tex, centeredCoord);
         vec3 resolutionCrushCol = floor(rateCrushCol.rgb * resolutionCrush) / resolutionCrush;
         
         fragColor = vec4(resolutionCrushCol, rateCrushCol.a);
