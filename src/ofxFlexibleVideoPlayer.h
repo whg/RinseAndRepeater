@@ -33,6 +33,8 @@ public:
     void setSpeed(float speed) { mSpeed = speed; }
     float getSpeed() { return mSpeed; }
     
+    size_t getNumFrames() { return mTextures.size(); }
+    
 protected:
     vector<ofTexture> mTextures;
     ofxMaxiSample mSoundtrackSample;

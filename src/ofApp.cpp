@@ -5,11 +5,13 @@ map<int, std::function<void(int)>> startMap;
 
 #include "whelpersg/json/json.hpp"
 
+#include "whelpersg/ofxTools.h"
 
-#define STRINGIFY(x) #x
+//#define DEBUG
 
-static const string shaderVersion = "#version 150\n";
-static const string vertShader = shaderVersion + STRINGIFY(
+const char *hitKeys = "asdfghjk";
+
+static const string vertShader = GLSL150(
     uniform mat4 modelViewProjectionMatrix;
 
     in vec4  position;
@@ -24,7 +26,7 @@ static const string vertShader = shaderVersion + STRINGIFY(
 );
 
 
-static const string fragShader = shaderVersion + STRINGIFY(
+static const string fragShader = GLSL150(
     uniform sampler2DRect tex;
     uniform vec2 size;
     uniform float resolutionCrush;
@@ -49,39 +51,71 @@ static const string fragShader = shaderVersion + STRINGIFY(
 );
 
 void ofApp::setup() {
-    
+        
+#ifdef DEBUG
+
     std::ifstream f("../../../settings.json");
     auto json = nlohmann::json::parse(f);
 
+    flexiPlayer.load(json["frames"], json["audio"]);
+#else
     
     auto imageFolderResult = ofSystemLoadDialog("Choose the images folder", true);
     
     string soundtrackPath = "";
+    bool exit = false;
     while (soundtrackPath.find(".wav") == -1) {
         auto soundtrackFolderResult = ofSystemLoadDialog("Choose the soundtrack (it needs to be a .wav)", false);
         soundtrackPath = soundtrackFolderResult.getPath();
+        
+        if (!soundtrackFolderResult.bSuccess) {
+            exit = true;
+            break;
+        }
+    }
+    if (exit) {
+        ofExit();
+    }
+    else {
+        flexiPlayer.load(imageFolderResult.getPath(), soundtrackPath);
+    }
+
+#endif
+    
+    panel.setup();
+
+    speed.addListener(this, &ofApp::speedChanged);
+    panel.add(speed.set("speed", 1, -2, 2));
+    panel.add(resolutionCrush.set("resolutionCrush", 200, 200, 1));
+    panel.add(rateCrush.set("rateCrush", 1, 1, 200));
+
+    
+    midiDevices.setName("MIDI Device");
+    auto &devices = ofxMidiIn::getPortList();
+    for (const auto &deviceName : devices) {
+        midiDevices.addChoice(deviceName);
     }
     
     
-    flexiPlayer.load(imageFolderResult.getPath(), soundtrackPath);
-    
-    ofSoundStreamSetup(2, 0);
-    
-    ofxMidiIn::listPorts();
-    string midiPort = json["midi-name"];
-    midiIn.openPort(midiPort);
+    midiIn.openPort(midiDevices.getCurrentChoice());
     midiIn.addListener(this);
 
-    functionMap[3] = [this](int value) { this->flexiPlayer.setSpeed(ofMap(value, 0, 127, 0.1, 3)); };
+    vector<int> triggerFrames = { 2, 23, 60, 311, 352, 360, 367, 375 };
+    startFrames.resize(8);
+    startNotes.resize(8);
+    startGroups.resize(8);
     
-//    float triggerFrames[] = { 2, 23, 60, 311, 352, 360, 367, 375 };
-    vector<int> triggerFrames = json["start-points"];
     
     for (int i = 0; i < 8; i++) {
-        starts[i] = triggerFrames[i];
-        startMap[44+i] = [this, i](int vel) { this->flexiPlayer.setFrame(starts[i]); };
-        
+        startGroups[i].setup("Start " + ofToString(i+1));
+
+        startGroups[i].add(startFrames[i].set("Frame", triggerFrames[i], 0, flexiPlayer.getNumFrames()));
+        startGroups[i].add(startNotes[i].set("MIDI note (key " + ofToString(hitKeys[i]) +")", 44+i, 0, 127));
+        panel.add(&startGroups[i]);
+
     }
+    
+    
     
     fbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGB);
     mosaicShader.setupShaderFromSource(GL_VERTEX_SHADER, vertShader);
@@ -91,10 +125,10 @@ void ofApp::setup() {
     
     maxCrush = 320;
     
-    panel.setup();
-    panel.add(resolutionCrush.set("resolutionCrush", 200, 200, 1));
-    panel.add(rateCrush.set("rateCrush", 1, 1, 200));
-
+    midiMapper.setup(midiIn);
+    
+    ofSetWindowTitle("Rinse and Repeater");
+    ofSoundStreamSetup(2, 0);
 }
 
 void ofApp::audioOut( ofSoundBuffer& buffer ) {
@@ -146,14 +180,20 @@ void ofApp::draw() {
     mosaicShader.end();
     ofPopMatrix();
     
-    panel.draw();
+    if (panel.isVisible()) panel.draw();
 }
 
 
 void ofApp::keyPressed(int key) {
-    if (key == ' ') {
-        flexiPlayer.setSpeed(flexiPlayer.getSpeed() * -1);
+
+    KEY('r', flexiPlayer.setSpeed(flexiPlayer.getSpeed() * -1));
+    KEY(' ', panel.toggleVisibility());
+    
+    for (int i = 0; i < startFrames.size(); i++) {
+        KEY(hitKeys[i], this->flexiPlayer.setFrame(startFrames[i]));
+
     }
+    
 }
 
 void ofApp::keyReleased(int key) {}
@@ -174,5 +214,16 @@ void ofApp::newMidiMessage(ofxMidiMessage& msg) {
         if (startMap.count(msg.pitch)) {
             startMap[msg.pitch](msg.velocity);
         }
+        for (int i = 0; i < startNotes.size(); i++) {
+            if (msg.pitch == startNotes[i]) {
+                flexiPlayer.setFrame(startFrames[i]);
+                break;
+            }
+        }
     }
+}
+
+void ofApp::midiDeviceChange(ofxRadioGroupEventArgs &args) {
+    midiIn.closePort();
+    midiIn.openPort(args.name);
 }

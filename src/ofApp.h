@@ -3,11 +3,13 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxMidi.h"
+#include "whelpersg/ofxRadioGroup.h"
 
 #include "ofxFlexibleVideoPlayer.h"
+#include "whelpersg/ofxMidiMapper.h"
 
 
-class ofApp : public ofBaseApp, public ofxMidiListener {
+class ofApp : public ofBaseApp {
 public:
     void setup();
     void update();
@@ -23,13 +25,22 @@ public:
     void audioOut( ofSoundBuffer& buffer );
 
     ofxPanel panel;
-    
+    bool showGui;
+    ofxRadioGroup midiDevices;
+    void midiDeviceChange(ofxRadioGroupEventArgs &args);
     
     ofxMidiIn midiIn;
     void newMidiMessage(ofxMidiMessage& msg);
 
     ofxFlexibleVideoPlayer flexiPlayer;
-    float starts[8];
+
+    ofParameter<float> speed;
+    void speedChanged(float &speed) { flexiPlayer.setSpeed(speed); }
+
+    vector<ofxGuiGroup> startGroups;
+    vector<ofParameter<int>> startFrames;
+    vector<ofParameter<int>> startNotes;
+
     
     map<int, std::function<void(int)>> functionMap;
     map<int, std::function<void(int)>> startMap;
@@ -38,4 +49,8 @@ public:
     ofShader mosaicShader;
     ofParameter<int> resolutionCrush, rateCrush;
     int crushAmount, maxCrush;
+    
+    ofxMidiMapper midiMapper;
+    
+    ofParameter<float> something;
 };

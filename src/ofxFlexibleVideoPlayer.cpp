@@ -8,10 +8,11 @@
 
 #include "ofxFlexibleVideoPlayer.h"
 
-#define STRINGIFY(x) #x
+#include "whelpersg/ofxTools.h"
+
 
 static const string shaderVersion = "#version 150\n";
-static const string vertShader = shaderVersion + STRINGIFY(
+static const string vertShader = GLSL150(
     uniform mat4 modelViewProjectionMatrix;
 
     in vec4  position;
@@ -26,7 +27,7 @@ static const string vertShader = shaderVersion + STRINGIFY(
 );
 
 
-static const string fragShader = shaderVersion + STRINGIFY(
+static const string fragShader = GLSL150(
     uniform sampler2DRect texA;
     uniform sampler2DRect texB;
     uniform float blend;
@@ -115,9 +116,7 @@ void ofxFlexibleVideoPlayer::update() {
             setPositionTime(mContentLength);
         }
     }
-    
-    cout << mAudioStep << endl;
-    
+        
 }
 
 void ofxFlexibleVideoPlayer::draw() {
