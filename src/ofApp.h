@@ -37,6 +37,7 @@ public:
     ofParameter<float> speed;
     void speedChanged(float &speed) { flexiPlayer.setSpeed(speed); }
 
+    ofxPanel startsPanel;
     vector<ofxGuiGroup> startGroups;
     vector<ofParameter<int>> startFrames;
     vector<ofParameter<int>> startNotes;
@@ -53,4 +54,6 @@ public:
     ofxMidiMapper midiMapper;
     
     ofParameter<float> something;
+    
+    ofImage logoImage;
 };

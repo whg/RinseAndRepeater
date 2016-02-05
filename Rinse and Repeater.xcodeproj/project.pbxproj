@@ -40,6 +40,7 @@
 		EE8587C01C64909500350C7A /* ofxSliderGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE8587B61C64909500350C7A /* ofxSliderGroup.cpp */; };
 		EE8587C11C64909500350C7A /* ofxToggle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE8587B81C64909500350C7A /* ofxToggle.cpp */; };
 		EE8587D01C64B75300350C7A /* ofxMidiMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE8587CF1C64B75300350C7A /* ofxMidiMapper.cpp */; };
+		EE8587D21C64F67E00350C7A /* itg_logo128.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = EE8587D11C64F67A00350C7A /* itg_logo128.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,8 +65,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 10;
+			dstSubfolderSpec = 7;
 			files = (
+				EE8587D21C64F67E00350C7A /* itg_logo128.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,6 +160,7 @@
 		EE8587CD1C64A93100350C7A /* timing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
 		EE8587CE1C64B54000350C7A /* ofxMidiMapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxMidiMapper.h; sourceTree = "<group>"; };
 		EE8587CF1C64B75300350C7A /* ofxMidiMapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxMidiMapper.cpp; sourceTree = "<group>"; };
+		EE8587D11C64F67A00350C7A /* itg_logo128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = itg_logo128.png; path = resources/itg_logo128.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +204,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				EE8587D11C64F67A00350C7A /* itg_logo128.png */,
 				EE8587351C6284D700350C7A /* CoreMIDI.framework */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
@@ -632,6 +636,9 @@
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
+				ICON_FILE_PATH = "$(SRCROOT)/resources/";
+				ICON_NAME_DEBUG = itg.icns;
+				ICON_NAME_RELEASE = itg.icns;
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
@@ -660,6 +667,9 @@
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
+				ICON_FILE_PATH = "$(SRCROOT)/resources/";
+				ICON_NAME_DEBUG = itg.icns;
+				ICON_NAME_RELEASE = itg.icns;
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";

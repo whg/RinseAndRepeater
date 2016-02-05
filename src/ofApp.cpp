@@ -51,6 +51,8 @@ static const string fragShader = GLSL150(
 );
 
 void ofApp::setup() {
+
+    ofDrawBitmapString("Loading images...", 10, 10);
         
 #ifdef DEBUG
 
@@ -86,7 +88,7 @@ void ofApp::setup() {
 
     speed.addListener(this, &ofApp::speedChanged);
     panel.add(speed.set("speed", 1, -2, 2));
-    panel.add(resolutionCrush.set("resolutionCrush", 200, 200, 1));
+    panel.add(resolutionCrush.set("resolutionCrush", 100, 100, 1));
     panel.add(rateCrush.set("rateCrush", 1, 1, 200));
 
     
@@ -95,7 +97,8 @@ void ofApp::setup() {
     for (const auto &deviceName : devices) {
         midiDevices.addChoice(deviceName);
     }
-    
+    ofAddListener(midiDevices.changeEvent, this, &ofApp::midiDeviceChange);
+    panel.add(midiDevices);
     
     midiIn.openPort(midiDevices.getCurrentChoice());
     midiIn.addListener(this);
@@ -106,12 +109,14 @@ void ofApp::setup() {
     startGroups.resize(8);
     
     
+    startsPanel.setup("Starts", "starts.xml", 300, 10);
+    
     for (int i = 0; i < 8; i++) {
         startGroups[i].setup("Start " + ofToString(i+1));
 
         startGroups[i].add(startFrames[i].set("Frame", triggerFrames[i], 0, flexiPlayer.getNumFrames()));
         startGroups[i].add(startNotes[i].set("MIDI note (key " + ofToString(hitKeys[i]) +")", 44+i, 0, 127));
-        panel.add(&startGroups[i]);
+        startsPanel.add(&startGroups[i]);
 
     }
     
@@ -126,6 +131,9 @@ void ofApp::setup() {
     maxCrush = 320;
     
     midiMapper.setup(midiIn);
+
+    ofSetDataPathRoot("../Resources/");
+    logoImage.load("itg_logo128.png");
     
     ofSetWindowTitle("Rinse and Repeater");
     ofSoundStreamSetup(2, 0);
@@ -172,7 +180,7 @@ void ofApp::draw() {
     mosaicShader.setUniformTexture("tex", fbo.getTexture(), 0);
     mosaicShader.setUniform2f("size", size);
     
-    mosaicShader.setUniform1f("resolutionCrush", float(resolutionCrush));
+    mosaicShader.setUniform1f("resolutionCrush", float(resolutionCrush/2));
     mosaicShader.setUniform1f("rateCrush", float(rateCrush));
 
     mesh.drawFaces();
@@ -180,7 +188,12 @@ void ofApp::draw() {
     mosaicShader.end();
     ofPopMatrix();
     
-    if (panel.isVisible()) panel.draw();
+    logoImage.draw(ofGetWidth()-logoImage.getWidth()-5, ofGetHeight()-logoImage.getHeight()-5);
+    
+    if (panel.isVisible()) {
+        panel.draw();
+        startsPanel.draw();
+    }
 }
 
 
