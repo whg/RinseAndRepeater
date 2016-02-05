@@ -36,9 +36,11 @@ static const string fragShader = shaderVersion + STRINGIFY(
 
     void main(){
         //make the mosaic pixels square
-        vec2 crushVector = vec2(rateCrush) * vec2(1.0, size.y / size.x);
+        vec2 squarePixel = vec2(1.0, size.x / size.y);
         
-        vec4 rateCrushCol = texture(tex, (floor(texCoordVarying * crushVector) / crushVector) * size);
+//        vec4 rateCrushCol = texture(tex, (floor(texCoordVarying * crushVector) / crushVector) * size);
+        vec2 scaledCoord = texCoordVarying * size;// * squarePixel;
+        vec4 rateCrushCol = texture(tex, scaledCoord - mod(scaledCoord, vec2(rateCrush)));
         vec3 resolutionCrushCol = floor(rateCrushCol.rgb * resolutionCrush) / resolutionCrush;
         
         fragColor = vec4(resolutionCrushCol, rateCrushCol.a);
@@ -126,7 +128,7 @@ void ofApp::draw() {
     mosaicShader.setUniform2f("size", size);
     
     mosaicShader.setUniform1f("resolutionCrush", float(resolutionCrush));
-    mosaicShader.setUniform1f("rateCrush", float(rateCrush.getMax() - rateCrush));
+    mosaicShader.setUniform1f("rateCrush", float(rateCrush));
 
     mesh.drawFaces();
     
