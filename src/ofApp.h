@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include "ofxGui.h"
 #include "ofxMidi.h"
 
 #include "ofxFlexibleVideoPlayer.h"
@@ -22,6 +22,8 @@ public:
 
     void audioOut( ofSoundBuffer& buffer );
 
+    ofxPanel panel;
+    
     
     ofxMidiIn midiIn;
     void newMidiMessage(ofxMidiMessage& msg);
@@ -32,4 +34,8 @@ public:
     map<int, std::function<void(int)>> functionMap;
     map<int, std::function<void(int)>> startMap;
 
+    ofFbo fbo;
+    ofShader mosaicShader;
+    ofParameter<int> resolutionCrush, rateCrush;
+    int crushAmount, maxCrush;
 };

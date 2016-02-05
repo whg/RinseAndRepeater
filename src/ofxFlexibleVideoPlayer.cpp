@@ -62,7 +62,7 @@ void ofxFlexibleVideoPlayer::load(string framesFolder, string audioFile, float f
         ofTexture tex;
         img.load(path);
         tex.loadData(img.getPixels());
-        mTextures.emplace_back(std::move(tex));
+        mTextures.push_back(std::move(tex));
         
         cout << file.getAbsolutePath() << endl;
     }
