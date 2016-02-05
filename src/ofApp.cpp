@@ -53,8 +53,19 @@ void ofApp::setup() {
     std::ifstream f("../../../settings.json");
     auto json = nlohmann::json::parse(f);
 
-    flexiPlayer.load(json["frames"], json["audio"]);
-    ofSoundStreamSetup(2, 0, 44100, 512, 2);
+    
+    auto imageFolderResult = ofSystemLoadDialog("Choose the images folder", true);
+    
+    string soundtrackPath = "";
+    while (soundtrackPath.find(".wav") == -1) {
+        auto soundtrackFolderResult = ofSystemLoadDialog("Choose the soundtrack (it needs to be a .wav)", false);
+        soundtrackPath = soundtrackFolderResult.getPath();
+    }
+    
+    
+    flexiPlayer.load(imageFolderResult.getPath(), soundtrackPath);
+    
+    ofSoundStreamSetup(2, 0);
     
     ofxMidiIn::listPorts();
     string midiPort = json["midi-name"];
