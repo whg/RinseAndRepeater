@@ -22,7 +22,7 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
 
-    void audioOut( ofSoundBuffer& buffer );
+    void audioOut(ofSoundBuffer& buffer);
 
     ofxPanel panel;
     bool showGui;
@@ -41,7 +41,9 @@ public:
     vector<ofxGuiGroup> startGroups;
     vector<ofParameter<int>> startFrames;
     vector<ofParameter<int>> startNotes;
-
+    vector<ofParameter<int>> loopLengths;
+    int currentCueIndex;
+    bool doLoop;
     
     map<int, std::function<void(int)>> functionMap;
     map<int, std::function<void(int)>> startMap;
@@ -52,8 +54,9 @@ public:
     int crushAmount, maxCrush;
     
     ofxMidiMapper midiMapper;
-    
-    ofParameter<float> something;
-    
+        
     ofImage logoImage;
+    
+protected:
+    void startVideoAtCueIndex(int index);
 };

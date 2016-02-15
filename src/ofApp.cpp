@@ -107,7 +107,7 @@ void ofApp::setup() {
     startFrames.resize(8);
     startNotes.resize(8);
     startGroups.resize(8);
-    
+    loopLengths.resize(8);
     
     startsPanel.setup("Starts", "starts.xml", 300, 10);
     
@@ -116,10 +116,12 @@ void ofApp::setup() {
 
         startGroups[i].add(startFrames[i].set("Frame", triggerFrames[i], 0, flexiPlayer.getNumFrames()));
         startGroups[i].add(startNotes[i].set("MIDI note (key " + ofToString(hitKeys[i]) +")", 44+i, 0, 127));
+        startGroups[i].add(loopLengths[i].set("Loop length", 1, 0, flexiPlayer.getNumFrames()));
         startsPanel.add(&startGroups[i]);
 
     }
-    
+    startVideoAtCueIndex(0);
+    doLoop = false;
     
     fbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGB);
     mosaicShader.setupShaderFromSource(GL_VERTEX_SHADER, vertShader);
@@ -154,10 +156,18 @@ void ofApp::audioOut( ofSoundBuffer& buffer ) {
 }
 
 void ofApp::update() {
+
     
     flexiPlayer.update();
+
     
-//    crushAmount = MIN(maxCrush, MAX(1, mouseX));
+    if (doLoop) {
+        auto loopEndFrame = startFrames[currentCueIndex] + loopLengths[currentCueIndex];
+        
+        if (flexiPlayer.getFrame() > loopEndFrame) {
+            startVideoAtCueIndex(currentCueIndex);
+        }
+    }
 
 }
 
@@ -195,20 +205,36 @@ void ofApp::draw() {
     }
 }
 
+void ofApp::startVideoAtCueIndex(int index) {
+    flexiPlayer.setFrame(startFrames[index]);
+    flexiPlayer.setCueFrame(startFrames[index]);
+    currentCueIndex = index;
+    doLoop = true;
+}
+
 
 void ofApp::keyPressed(int key) {
 
     KEY('r', flexiPlayer.setSpeed(flexiPlayer.getSpeed() * -1));
     KEY(' ', panel.toggleVisibility());
     
+    if (doLoop) return; // don't retrigger from keyPress being called
+    
     for (int i = 0; i < startFrames.size(); i++) {
-        KEY(hitKeys[i], this->flexiPlayer.setFrame(startFrames[i]));
+        KEY(hitKeys[i], {
+            startVideoAtCueIndex(i);
+            break;
+        });
 
     }
     
 }
 
-void ofApp::keyReleased(int key) {}
+void ofApp::keyReleased(int key) {
+    for (int i = 0; i < startFrames.size(); i++) {
+        KEY(hitKeys[i], doLoop = false);
+    }
+}
 void ofApp::mouseMoved(int x, int y) {}
 void ofApp::mouseDragged(int x, int y, int button) {}
 void ofApp::mousePressed(int x, int y, int button) {}
@@ -228,10 +254,13 @@ void ofApp::newMidiMessage(ofxMidiMessage& msg) {
         }
         for (int i = 0; i < startNotes.size(); i++) {
             if (msg.pitch == startNotes[i]) {
-                flexiPlayer.setFrame(startFrames[i]);
+                startVideoAtCueIndex(i);
                 break;
             }
         }
+    }
+    else if (msg.status == MIDI_NOTE_OFF) {
+        doLoop = false;
     }
 }
 
