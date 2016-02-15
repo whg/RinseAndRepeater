@@ -30,9 +30,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "238"
-            endingLineNumber = "238"
-            landmarkName = "ofApp::midiDeviceChange(ofxRadioGroupEventArgs &amp;args)"
-            landmarkType = "5">
+            endingLineNumber = "238">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

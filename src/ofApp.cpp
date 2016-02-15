@@ -7,7 +7,7 @@ map<int, std::function<void(int)>> startMap;
 
 #include "whelpersg/ofxTools.h"
 
-//#define DEBUG
+#define DEBUG
 
 const char *hitKeys = "asdfghjk";
 
@@ -119,7 +119,6 @@ void ofApp::setup() {
         startsPanel.add(&startGroups[i]);
 
     }
-    
     
     
     fbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGB);

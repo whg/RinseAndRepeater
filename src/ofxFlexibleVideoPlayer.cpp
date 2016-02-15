@@ -46,7 +46,7 @@ static const string fragShader = GLSL150(
 ofxFlexibleVideoPlayer::ofxFlexibleVideoPlayer():
 mLastUpdateTime(0),
 mFrameRate(0),
-mLoop(OF_LOOP_NORMAL),
+mLoop(LoopType::END),
 mAudioStep(1),
 mSpeed(1) {}
 
@@ -108,12 +108,17 @@ void ofxFlexibleVideoPlayer::update() {
     audioMutex.unlock();
     
     // simple loopback
-    if (mLoop == OF_LOOP_NORMAL) {
+    if (mLoop == LoopType::WHOLE) {
         if (mPlayhead >= mContentLength) {
             setPositionTime(0);
         }
         else if (mPlayhead < 0) {
             setPositionTime(mContentLength);
+        }
+    }
+    else if (mLoop == LoopType::END) {
+        if (mPlayhead >= mContentLength) {
+            setPositionTime(mCuePoint);
         }
     }
         
@@ -128,14 +133,6 @@ void ofxFlexibleVideoPlayer::draw() {
     frameA %= mTextures.size();
     frameB %= mTextures.size();
     
-//    if (frameB == mTextures.size()) {
-//        if (frameA == mTextures.size()) {
-//            frameA = 0;
-//        }
-//        else {
-//            frameB = 0;
-//        }
-//    }
     if (frameB == frameA) {
         if (mSpeed > 0) {
             frameB = (frameA + 1 + mTextures.size()) % mTextures.size();
