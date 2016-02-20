@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>FB48AE3D-DB49-46D4-9CF2-316647764121</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Rinse and Repeater</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>7D4797A566D96416DEE57F5AE472AAC0B42BB223</key>
+		<string>https://github.com/whg/RinseAndRepeater.git</string>
+		<key>90E2F969A762FB62C413A0C44D1F334E6EC3F531</key>
+		<string>https://github.com/whg/ofxMidi.git</string>
+		<key>917B9FE762B5270BE53A1D8F3A46661514A3A72B</key>
+		<string>https://github.com/whg/ofxGuiMappable.git</string>
+		<key>BA1C00E456100C39E4E5DE61EC06B17F8DFBD9E3</key>
+		<string>https://github.com/whg/whelpersg.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Rinse and Repeater.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>7D4797A566D96416DEE57F5AE472AAC0B42BB223</key>
+		<string>../..</string>
+		<key>90E2F969A762FB62C413A0C44D1F334E6EC3F531</key>
+		<string>../../../../../addons/ofxMidi</string>
+		<key>917B9FE762B5270BE53A1D8F3A46661514A3A72B</key>
+		<string>../../../../../addons/ofxGuiMappable</string>
+		<key>BA1C00E456100C39E4E5DE61EC06B17F8DFBD9E3</key>
+		<string>../../../../../../../include/whelpersg</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/whg/RinseAndRepeater.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>7D4797A566D96416DEE57F5AE472AAC0B42BB223</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7D4797A566D96416DEE57F5AE472AAC0B42BB223</string>
+			<key>IDESourceControlWCCName</key>
+			<string>deperados_video</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>917B9FE762B5270BE53A1D8F3A46661514A3A72B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxGuiMappable</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>90E2F969A762FB62C413A0C44D1F334E6EC3F531</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxMidi</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>BA1C00E456100C39E4E5DE61EC06B17F8DFBD9E3</string>
+			<key>IDESourceControlWCCName</key>
+			<string>whelpersg</string>
+		</dict>
+	</array>
+</dict>
+</plist>
