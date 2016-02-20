@@ -102,6 +102,8 @@ void ofApp::setup() {
     
     midiIn.openPort(midiDevices.getCurrentChoice());
     midiIn.addListener(this);
+    
+    midiOut.openPort("virtualMIDI");
 
     vector<int> triggerFrames = { 2, 23, 60, 311, 352, 360, 367, 375 };
     startFrames.resize(8);
@@ -137,7 +139,7 @@ void ofApp::setup() {
     logoImage.load("itg_logo128.png");
     
     ofSetWindowTitle("Rinse and Repeater");
-    ofSoundStreamSetup(2, 0);
+//    ofSoundStreamSetup(2, 0);
 }
 
 void ofApp::audioOut( ofSoundBuffer& buffer ) {
@@ -210,6 +212,9 @@ void ofApp::startVideoAtCueIndex(int index) {
     flexiPlayer.setCueFrame(startFrames[index]);
     currentCueIndex = index;
     doLoop = true;
+    
+    midiOut.sendNoteOn(1, 90 + index, 127);
+    midiOut.sendNoteOff(1, 90 + index);
 }
 
 

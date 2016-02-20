@@ -32,6 +32,8 @@ public:
     ofxMidiIn midiIn;
     void newMidiMessage(ofxMidiMessage& msg);
 
+    ofxMidiOut midiOut;
+    
     ofxFlexibleVideoPlayer flexiPlayer;
 
     ofParameter<float> speed;
