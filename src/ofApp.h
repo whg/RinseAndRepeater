@@ -26,13 +26,15 @@ public:
 
     ofxPanel panel;
     bool showGui;
-    ofxRadioGroup midiDevices;
-    void midiDeviceChange(ofxRadioGroupEventArgs &args);
+    ofxRadioGroup midiInputDevices, midiOutputDevices;
+    void midiInputDeviceChange(ofxRadioGroupEventArgs &args);
+	void midiOutputDeviceChange(ofxRadioGroupEventArgs &args);
     
     ofxMidiIn midiIn;
     void newMidiMessage(ofxMidiMessage& msg);
 
     ofxMidiOut midiOut;
+	int lastCuePlayedIndex;
     
     ofxFlexibleVideoPlayer flexiPlayer;
 
@@ -58,6 +60,8 @@ public:
     ofxMidiMapper midiMapper;
         
     ofImage logoImage;
+	
+	int currentKeyDown;
     
 protected:
     void startVideoAtCueIndex(int index);

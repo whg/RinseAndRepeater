@@ -1,5 +1,9 @@
 #include "ofApp.h"
 
+#define NO_INDEX_SET -1
+#define MIDI_NOTE_OUT_OFFSET 60
+#define MIDI_NOTE_OUT_CHANNEL 11
+
 map<int, std::function<void(int)>> functionMap;
 map<int, std::function<void(int)>> startMap;
 
@@ -92,18 +96,26 @@ void ofApp::setup() {
     panel.add(rateCrush.set("rateCrush", 1, 1, 200));
 
     
-    midiDevices.setName("MIDI Device");
+    midiInputDevices.setName("MIDI Input");
     auto &devices = ofxMidiIn::getPortList();
     for (const auto &deviceName : devices) {
-        midiDevices.addChoice(deviceName);
+        midiInputDevices.addChoice(deviceName);
     }
-    ofAddListener(midiDevices.changeEvent, this, &ofApp::midiDeviceChange);
-    panel.add(midiDevices);
-    
-    midiIn.openPort(midiDevices.getCurrentChoice());
-    midiIn.addListener(this);
-    
-    midiOut.openPort("virtualMIDI");
+    ofAddListener(midiInputDevices.changeEvent, this, &ofApp::midiInputDeviceChange);
+    panel.add(midiInputDevices);
+	midiIn.openPort(midiInputDevices.getCurrentChoice());
+	midiIn.addListener(this);
+	
+	midiOutputDevices.setName("MIDI Output");
+	auto &outputDevices = ofxMidiOut::getPortList();
+	for (const auto &deviceName : outputDevices) {
+		midiOutputDevices.addChoice(deviceName);
+	}
+	ofAddListener(midiOutputDevices.changeEvent, this, &ofApp::midiOutputDeviceChange);
+	panel.add(midiOutputDevices);
+    midiOut.openPort(midiOutputDevices.getCurrentChoice());
+
+	lastCuePlayedIndex = NO_INDEX_SET;
 
     vector<int> triggerFrames = { 2, 23, 60, 311, 352, 360, 367, 375 };
     startFrames.resize(8);
@@ -144,17 +156,17 @@ void ofApp::setup() {
 
 void ofApp::audioOut( ofSoundBuffer& buffer ) {
 
-    flexiPlayer.audioOut(buffer);
-    
-    auto &data = buffer.getBuffer();
-    float lastSample, v;
-    for (int i = 0; i < buffer.getNumFrames(); i++) {
-        if (i % rateCrush == 0) v = data[i*2];
-
-        v = int(v * resolutionCrush) / float(resolutionCrush);
-        
-        data[i*2] = data[i*2+1] = v;
-    }
+//    flexiPlayer.audioOut(buffer);
+//    
+//    auto &data = buffer.getBuffer();
+//    float lastSample, v;
+//    for (int i = 0; i < buffer.getNumFrames(); i++) {
+//        if (i % rateCrush == 0) v = data[i*2];
+//
+//        v = int(v * resolutionCrush) / float(resolutionCrush);
+//        
+//        data[i*2] = data[i*2+1] = v;
+//    }
 }
 
 void ofApp::update() {
@@ -212,9 +224,14 @@ void ofApp::startVideoAtCueIndex(int index) {
     flexiPlayer.setCueFrame(startFrames[index]);
     currentCueIndex = index;
     doLoop = true;
-    
-    midiOut.sendNoteOn(1, 90 + index, 127);
-    midiOut.sendNoteOff(1, 90 + index);
+	
+	if (lastCuePlayedIndex != NO_INDEX_SET) {
+		midiOut.sendNoteOff(MIDI_NOTE_OUT_CHANNEL, MIDI_NOTE_OUT_OFFSET + lastCuePlayedIndex);
+	}
+	
+    midiOut.sendNoteOn(MIDI_NOTE_OUT_CHANNEL, MIDI_NOTE_OUT_OFFSET + index, 127);
+	
+	lastCuePlayedIndex = index;
 }
 
 
@@ -232,7 +249,8 @@ void ofApp::keyPressed(int key) {
         });
 
     }
-    
+	
+	currentKeyDown = key;
 }
 
 void ofApp::keyReleased(int key) {
@@ -269,7 +287,13 @@ void ofApp::newMidiMessage(ofxMidiMessage& msg) {
     }
 }
 
-void ofApp::midiDeviceChange(ofxRadioGroupEventArgs &args) {
+void ofApp::midiInputDeviceChange(ofxRadioGroupEventArgs &args) {
     midiIn.closePort();
     midiIn.openPort(args.name);
+	}
+
+void ofApp::midiOutputDeviceChange(ofxRadioGroupEventArgs &args) {
+	
+	midiOut.closePort();
+	midiOut.openPort(args.name);
 }

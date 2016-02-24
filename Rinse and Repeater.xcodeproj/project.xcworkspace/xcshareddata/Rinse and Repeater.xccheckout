@@ -26,11 +26,11 @@
 		<key>7D4797A566D96416DEE57F5AE472AAC0B42BB223</key>
 		<string>../..</string>
 		<key>90E2F969A762FB62C413A0C44D1F334E6EC3F531</key>
-		<string>../../../../../addons/ofxMidi</string>
+		<string>../../../addons/ofxMidi</string>
 		<key>917B9FE762B5270BE53A1D8F3A46661514A3A72B</key>
-		<string>../../../../../addons/ofxGuiMappable</string>
+		<string>../../../addons/ofxGuiMappable</string>
 		<key>BA1C00E456100C39E4E5DE61EC06B17F8DFBD9E3</key>
-		<string>../../../../../../../include/whelpersg</string>
+		<string>../../../include/whelpersg</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/whg/RinseAndRepeater.git</string>
